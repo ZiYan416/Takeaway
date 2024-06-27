@@ -228,7 +228,7 @@ def user_unsend():
         Data = []
         for i in range(len(data)):
             dic = dict(order_id=data[i][0], shop_name=data[i][1], price=data[i][2],
-                       cons_name=data[i][5], cons_addre=data[i][6], create_time=data[i][8])
+                       cons_name=data[i][4], cons_addre=data[i][5], create_time=data[i][7])
             Data.append(dic)
         return jsonify(status=200, tabledata=Data)
     if request.method == 'POST':
@@ -477,6 +477,7 @@ def manager_wuliu():
         return jsonify(status=200, tabledata=Data)
 
 
+# 管理员未发货订单
 @app.route("/api/manager/unsend", methods=["GET", "POST"])
 @cross_origin()
 def manager_unsend():
