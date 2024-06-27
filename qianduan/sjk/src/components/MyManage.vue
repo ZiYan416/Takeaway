@@ -13,10 +13,10 @@
                         <span slot="title">店铺管理</span>
                     </el-menu-item>
 
-                    <el-menu-item index="2">
+                    <!-- <el-menu-item index="2">
                         <i class="el-icon-s-custom"></i>
                         <span slot="title">服务员管理</span>
-                    </el-menu-item>
+                    </el-menu-item> -->
 
                     <el-menu-item index="3">
                         <i class="el-icon-s-check"></i>
@@ -51,6 +51,10 @@
                         </el-menu-item-group>
 
                     </el-submenu>
+                    <el-menu-item index="2">
+                        <i class="el-icon-s-custom"></i>
+                        <span slot="title">退出管理员后台</span>
+                    </el-menu-item>
 
                 </el-menu>
             </div>
@@ -59,9 +63,9 @@
                     <manageshop></manageshop>
                 </div>
 
-                <div id="manageserver" v-show="active == 2">
+                <!-- <div id="manageserver" v-show="active == 2">
                     <manageserver></manageserver>
-                </div>
+                </div> -->
 
                 <div id="managedispatcher" v-show="active == 3">
                     <managedispatcher></managedispatcher>
@@ -87,12 +91,23 @@
                 </div>
             </div>
         </div>
+        <el-dialog
+            title="确认退出"
+            :visible.sync="logoutDialogVisible"
+            width="30%"
+            @close="logoutDialogVisible = false">
+            <span>你确定要退出登录吗？</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="logoutDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="confirmLogout">确认</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
 <script>
 import manageshop from '@/components/ManageShop.vue'
-import manageserver from '@/components/ManageServer.vue'
+// import manageserver from '@/components/ManageServer.vue'
 import managedispatcher from '@/components/ManageDispatcher.vue'
 import wuliuended from '@/components/ManageWuliu/WuliuEnded.vue'
 import wuliuunended from '@/components/ManageWuliu/WuliuUnended.vue'
@@ -102,7 +117,7 @@ import orderunsend from '@/components/ManageOrder/UnSend.vue'
 export default {
     components: {
         manageshop: manageshop,
-        manageserver: manageserver,
+        // manageserver: manageserver,
         managedispatcher: managedispatcher,
         wuliuended: wuliuended,
         wuliuunended: wuliuunended,
@@ -113,12 +128,23 @@ export default {
     data() {
         return {
             active: 1,
+            logoutDialogVisible: false, // 控制退出登录确认弹窗的显示
         }
     },
     methods: {
         handleselect(index) {
-            this.active = index;
-        }
+            if (index == 2) {
+                this.logoutDialogVisible = true; // 显示退出登录确认弹窗
+            } else {
+                this.active = index;
+            }
+        },
+        confirmLogout() {
+            // 实现退出登录逻辑，比如清除本地存储中的用户信息并重定向到登录页面
+            localStorage.removeItem('userToken'); // 假设你用localStorage存储用户令牌
+            this.$router.push('/login'); // 假设你用vue-router重定向到登录页面
+            this.logoutDialogVisible = false; // 关闭弹窗
+        },
     },
 }
 </script>
