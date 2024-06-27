@@ -33,7 +33,8 @@ with app.app_context():
 
 
 # 路由定义
-# 用户登录
+
+# 用户登录DONE
 @app.route("/api/user/login", methods=["POST"])
 @cross_origin()
 def user_login():
@@ -55,7 +56,7 @@ def user_login():
         return jsonify({"code": 1000, "msg": "用户名或密码错误"})
 
 
-# 用户注册
+# 用户注册DONE
 @app.route("/api/user/register/test", methods=["POST"])
 @cross_origin()
 def register():
@@ -163,6 +164,8 @@ def register():
 
 # 用户界面获取店铺信息
 
+#获取店铺列表
+
 @app.route("/api/user/shop", methods=["GET"])
 @cross_origin()
 def user_get_shop():
@@ -185,16 +188,24 @@ def user_addorder():
     # 获取各个参数
     shopname = rq.get("shop_name")
     ordermoney = rq.get("order_money")
-    orderway = rq.get("order_way")
     consphone = get_token_phone(request.headers.get('token'))
     consname = rq.get("cons_name")
     consaddre = rq.get("cons_addre")
     create_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # print(shop_name, order_money, order_way, cons_phone, cons_name, cons_addre)
-    db.session.execute(text(
-        'insert into oorder( shop_name, order_money, order_way, cons_phone, cons_name, cons_addre,create_time) value("%s", %d, "%s", "%s", "%s", "%s","%s")' % (
-            shopname, ordermoney, orderway, consphone, consname, consaddre, create_time)))
+    # print(shop_name, order_money, cons_phone, cons_name, cons_addre)
+    sql_insert_oorder = text('''
+        INSERT INTO oorder (shop_name, order_money, cons_phone, cons_name, cons_addre, create_time)
+        VALUES (:shop_name, :order_money, :cons_phone, :cons_name, :cons_addre, :create_time)
+    ''')
+    db.session.execute(sql_insert_oorder, {
+        'shop_name': shopname,
+        'order_money': ordermoney,
+        'cons_phone': consphone,
+        'cons_name': consname,
+        'cons_addre': consaddre,
+        'create_time': create_time
+    })
     db.session.commit()
     # db.session.execute('insert into fastfood_shop(shop_name, price, m_sale_v) values("解耦哎",10,100)')
     # db.session.commit()
@@ -216,7 +227,7 @@ def user_unsend():
         data = db.session.execute(text('select * from oorder where checked=0 and cons_phone="%s"' % phone)).fetchall()
         Data = []
         for i in range(len(data)):
-            dic = dict(order_id=data[i][0], shop_name=data[i][1], price=data[i][2], orderway=data[i][3],
+            dic = dict(order_id=data[i][0], shop_name=data[i][1], price=data[i][2],
                        cons_name=data[i][5], cons_addre=data[i][6], create_time=data[i][8])
             Data.append(dic)
         return jsonify(status=200, tabledata=Data)
@@ -247,7 +258,7 @@ def user_sending():
         data = db.session.execute(text('select * from sending_order where cons_phone="%s"' % phone)).fetchall()
         Data = []
         for i in range(len(data)):
-            dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2], order_way=data[i][3],
+            dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2],
                        cons_phone=data[i][4],
                        cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8],
                        disp_phone=data[i][9])
@@ -263,7 +274,7 @@ def user_sended():
         data = db.session.execute(text('select * from sended_order where cons_phone="%s"' % phone)).fetchall()
         Data = []
         for i in range(len(data)):
-            dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2], order_way=data[i][3],
+            dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2],
                        cons_phone=data[i][4],
                        cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8],
                        disp_phone=data[i][9])
@@ -271,6 +282,7 @@ def user_sended():
         return jsonify(status=200, tabledata=Data)
 
 
+# 获取个人信息DONE
 @app.route("/api/user/usermsg", methods=["POST", "GET"])
 @cross_origin()
 def usermsg():
@@ -282,8 +294,9 @@ def usermsg():
 
         return jsonify(status=200, data=Data)
 
-# 修改个人信息
-@app.route("/api/user/usermsg", methods=["POST"])
+
+# 修改个人信息DONE
+@app.route("/api/user/updateUserInfo", methods=["POST"])
 @cross_origin()
 def user_msg_chg():
     if request.method == 'POST':
@@ -293,11 +306,31 @@ def user_msg_chg():
         real_name = request.json.get('real_name')
         sex = request.json.get('sex')
         user_name = request.json.get('user_name')
-        db.session.execute(text('update user_msg set age="%s", mail= "%s", real_name="%s", sex="%s", user_name="%s" '
-                                'where phone="%s"' % (age, mail, real_name, sex, user_name, phone))).fetchall()
+
+        # 使用参数绑定来防止 SQL 注入
+        sql_update_user_msg = text('''
+            UPDATE user_msg 
+            SET age = :age, 
+                mail = :mail, 
+                real_name = :real_name, 
+                sex = :sex, 
+                user_name = :user_name 
+            WHERE phone = :phone
+        ''')
+
+        db.session.execute(sql_update_user_msg, {
+            'age': age,
+            'mail': mail,
+            'real_name': real_name,
+            'sex': sex,
+            'user_name': user_name,
+            'phone': phone
+        })
         db.session.commit()
         return jsonify(status=200, msg="修改成功")
 
+
+# 修改密码DONE
 @app.route("/api/user/pwd_chg", methods=["POST"])
 @cross_origin()
 def user_pwd_chg():
@@ -356,41 +389,41 @@ def manager_shop():
         return jsonify(status=200, msg="删除成功")
 
 
-@app.route("/api/manager/server", methods=["POST", "GET", "DELETE"])
-@cross_origin()
-def manager_server():
-    if request.method == 'GET':
-        data = db.session.execute(text('select * from server')).fetchall()
-        Data = []
-        for i in range(len(data)):
-            dic = dict(service_id=data[i][0], service_name=data[i][1], fastfood_shop_name=data[i][2])
-            Data.append(dic)
-        shop_range = db.session.execute(text('select shop_name from fastfood_shop')).fetchall()
-        Shop = []
-        for i in range(len(shop_range)):
-            dic = dict(shop_name=shop_range[i][0])
-            Shop.append(dic)
-        print(Shop)
-        return jsonify(status=200, tabledata=Data, shop_range=Shop)
-    if request.method == 'POST':
-        rq = request.json
-        service_id = rq.get('service_id')
-        service_name = rq.get('service_name')
-        fastfood_shop_name = rq.get('fastfood_shop_name')
-        exist = db.session.execute(text('select * from server where service_id="%s"' % service_id)).fetchall()
-        if not exist:
-            db.session.execute(
-                text('insert server(service_id,service_name,fastfood_shop_name) value("%s","%s","%s")' % (
-                    service_id, service_name, fastfood_shop_name)))
-            db.session.commit()
-            return jsonify(status=200, msg="添加成功")
-        else:
-            return jsonify(status=1000, msg="该编号已存在")
-    if request.method == 'DELETE':
-        want_delete = request.json.get('want_delete')
-        db.session.execute(text('delete from server where service_id="%s"' % want_delete))
-        db.session.commit()
-        return jsonify(status=200, msg="解雇成功")
+# @app.route("/api/manager/server", methods=["POST", "GET", "DELETE"])
+# @cross_origin()
+# def manager_server():
+#     if request.method == 'GET':
+#         data = db.session.execute(text('select * from server')).fetchall()
+#         Data = []
+#         for i in range(len(data)):
+#             dic = dict(service_id=data[i][0], service_name=data[i][1], fastfood_shop_name=data[i][2])
+#             Data.append(dic)
+#         shop_range = db.session.execute(text('select shop_name from fastfood_shop')).fetchall()
+#         Shop = []
+#         for i in range(len(shop_range)):
+#             dic = dict(shop_name=shop_range[i][0])
+#             Shop.append(dic)
+#         print(Shop)
+#         return jsonify(status=200, tabledata=Data, shop_range=Shop)
+#     if request.method == 'POST':
+#         rq = request.json
+#         service_id = rq.get('service_id')
+#         service_name = rq.get('service_name')
+#         fastfood_shop_name = rq.get('fastfood_shop_name')
+#         exist = db.session.execute(text('select * from server where service_id="%s"' % service_id)).fetchall()
+#         if not exist:
+#             db.session.execute(
+#                 text('insert server(service_id,service_name,fastfood_shop_name) value("%s","%s","%s")' % (
+#                     service_id, service_name, fastfood_shop_name)))
+#             db.session.commit()
+#             return jsonify(status=200, msg="添加成功")
+#         else:
+#             return jsonify(status=1000, msg="该编号已存在")
+#     if request.method == 'DELETE':
+#         want_delete = request.json.get('want_delete')
+#         db.session.execute(text('delete from server where service_id="%s"' % want_delete))
+#         db.session.commit()
+#         return jsonify(status=200, msg="解雇成功")
 
 
 @app.route("/api/manager/dispatcher", methods=["POST", "GET", "DELETE"])
@@ -451,9 +484,9 @@ def manager_unsend():
         data = db.session.execute(text('select * from oorder where checked=0')).fetchall()
         Data = []
         for i in range(len(data)):
-            dic = dict(order_id=data[i][0], shop_name=data[i][1], price=data[i][2], orderway=data[i][3],
-                       cons_phone=data[i][4],
-                       cons_name=data[i][5], cons_addre=data[i][6], create_time=data[i][8])
+            dic = dict(order_id=data[i][0], shop_name=data[i][1], price=data[i][2], create_time=data[i][7],
+                       cons_phone=data[i][3],
+                       cons_name=data[i][4], cons_addre=data[i][5])
             Data.append(dic)
 
         disp_range = db.session.execute(text('select * from dispatcher')).fetchall()  # 获取所有的送货员就id，供选择
@@ -483,7 +516,7 @@ def manager_sending():
         data = db.session.execute(text('select * from sending_order')).fetchall()
         Data = []
         for i in range(len(data)):
-            dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2], order_way=data[i][3],
+            dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2],
                        cons_phone=data[i][4],
                        cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8])
             Data.append(dic)
@@ -497,7 +530,7 @@ def manager_sended():
         data = db.session.execute(text('select * from sended_order')).fetchall()
         Data = []
         for i in range(len(data)):
-            dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2], order_way=data[i][3],
+            dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2],
                        cons_phone=data[i][4],
                        cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8])
             Data.append(dic)

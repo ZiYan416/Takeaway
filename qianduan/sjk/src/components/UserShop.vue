@@ -32,12 +32,12 @@
                             <!-- <el-input v-model="form.order_money"></el-input> -->
                         </el-form-item>
 
-                        <el-form-item label="订餐方式：">
+                        <!-- <el-form-item label="订餐方式：">
                             <el-select v-model="form.order_way" placeholder="请选择订餐方式">
                                 <el-option label="人工订餐" value="人工订餐"></el-option>
                                 <el-option label="网上订餐" value="网上订餐"></el-option>
                             </el-select>
-                        </el-form-item>
+                        </el-form-item> -->
 
                         <!-- <el-form-item label="客户电话：">
                             <el-input v-model="form.cons_phone"></el-input>

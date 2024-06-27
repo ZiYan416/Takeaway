@@ -13,8 +13,8 @@
                 </el-table-column>
                 <el-table-column prop="create_time" label="下单时间" width="200" align="center">
                 </el-table-column>
-                <el-table-column prop="orderway" label="订餐方式" width="100" align="center">
-                </el-table-column>
+                <!-- <el-table-column prop="orderway" label="订餐方式" width="100" align="center">
+                </el-table-column> -->
                 <el-table-column prop="cons_phone" label="订餐人电话" width="200" align="center">
                 </el-table-column>
                 <el-table-column prop="cons_name" label="订餐人姓名" width="100" align="center">

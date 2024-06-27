@@ -9,8 +9,8 @@
                 </el-table-column>
                 <el-table-column prop="order_money" label="订单价格" width="80" align="center">
                 </el-table-column>
-                <el-table-column prop="order_way" label="订餐方式" width="100" align="center">
-                </el-table-column>
+                <!-- <el-table-column prop="order_way" label="订餐方式" width="100" align="center">
+                </el-table-column> -->
                 <el-table-column prop="cons_name" label="订餐人姓名" width="100" align="center">
                 </el-table-column>
                 <el-table-column prop="cons_addre" label="取餐地址" width="150" align="center">
