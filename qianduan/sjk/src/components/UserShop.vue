@@ -32,6 +32,10 @@
                             <!-- <el-input v-model="form.order_money"></el-input> -->
                         </el-form-item>
 
+                        <el-form-item label="下单数量：">
+                            <el-input-number v-model="form.quantity" :min="1"></el-input-number>
+                        </el-form-item>
+
                         <!-- <el-form-item label="订餐方式：">
                             <el-select v-model="form.order_way" placeholder="请选择订餐方式">
                                 <el-option label="人工订餐" value="人工订餐"></el-option>
@@ -64,6 +68,8 @@
 </template>
 
 <script>
+import { EventBus } from '@/eventBus'; // 引入事件总线
+
 export default {
     created() {
         this.getdata();
@@ -75,7 +81,8 @@ export default {
             form: {
                 shop_name: '',
                 order_money: '',
-                order_way: '',
+                quantity: 1, // 默认数量为1
+                // order_way: '',
                 // cons_phone: '',
                 cons_name: '',
                 cons_addre: '',
@@ -106,6 +113,8 @@ export default {
                     })
                     this.dialog = false;
                     this.getdata();
+                     // 收货成功后，发送事件通知UserUnsend组件更新
+                     EventBus.$emit('orderadded');
                 }
             })
         }

@@ -40,7 +40,7 @@
                         </el-select>
 
                     </el-form-item>
-                    <el-form-item label="预计送货时间：">
+                    <el-form-item label="预计送货时间（分钟）：">
                         <el-input v-model="form.deliver_time"></el-input>
                     </el-form-item>
                 </el-form>
@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import { EventBus } from '@/eventBus'; // 引入事件总线
 export default {
     created() {
         this.getdata()
@@ -77,33 +78,78 @@ export default {
             this.$axios.get("/api/manager/unsend").then((res) => {
                 console.log(res.data);
                 if (res.data.status == 200) {
-                    this.tableData = res.data.tabledata;
+                    this.tableData = this.summarizeOrders(res.data.tabledata);
                     this.disp_range = res.data.disp_range;
                 }
             })
         },
+        summarizeOrders(orders) {
+            const summary = {};
+            orders.forEach(order => {
+                const key = `${order.shop_name}-${order.price}-${order.cons_phone}-${order.cons_name}-${order.cons_addre}-${order.create_time}`;
+                if (!summary[key]) {
+                    summary[key] = {
+                        ...order,
+                        order_ids: [order.order_id],
+                        total_price: order.price
+                    };
+                } else {
+                    summary[key].order_ids.push(order.order_id);
+                    summary[key].total_price += order.price;
+                }
+            });
+            return Object.values(summary).map(order => {
+                if (order.order_ids.length === 1) {
+                    order.order_id = order.order_ids[0].toString();  // 单独订单显示单个ID
+                } else {
+                    order.order_id = `${order.order_ids[0]}-${order.order_ids[order.order_ids.length - 1]}`;  // 多个订单显示范围
+                }
+                order.price = order.total_price; // 显示总价格
+                return order;
+            });
+        },
         show_dialog(row) {
-            this.form.order_id = row.order_id;
+            // 将 order_id 字符串转换为数组
+            const order_id_range = row.order_id.split('-').map(id => parseInt(id, 10));
+            const order_ids = [];
+            for (let i = order_id_range[0]; i <= order_id_range[order_id_range.length - 1]; i++) {
+                order_ids.push(i);
+            }
+            this.form.order_ids = order_ids;
             this.dialog = true;
         },
         add() {
-            this.$axios.post("/api/manager/unsend", this.form).then((res) => {
-                if (res.data.status == 200) {
+            const formData = {
+                ...this.form
+            };
+            this.$axios.post("/api/manager/unsend", formData).then((res) => {
+                if (res.data.status === 200) {
                     this.$message({
                         message: res.data.msg,
                         type: "success"
-                    })
+                    });
                     this.dialog = false;
-                    this.getdata();
+                    this.getdata(); // 刷新表格数据
+
+                    // 派发成功后，发送事件通知WuliuUnended组件更新
+                    EventBus.$emit('orderSending');
+                } else {
+                    this.$message({
+                        message: res.data.msg,
+                        type: "error"
+                    });
                 }
             })
         }
     }
 
+
 }
 </script>
 
+
 <style scoped>
+
 .header {
     width: 100%;
     height: 10%;
@@ -115,7 +161,6 @@ export default {
 }
 
 .body {
-
     width: 91%;
     margin: auto;
     margin-top: 30px;

@@ -188,6 +188,7 @@ def user_addorder():
     # 获取各个参数
     shopname = rq.get("shop_name")
     ordermoney = rq.get("order_money")
+    quantity = rq.get('quantity', 1)
     consphone = get_token_phone(request.headers.get('token'))
     consname = rq.get("cons_name")
     consaddre = rq.get("cons_addre")
@@ -198,14 +199,15 @@ def user_addorder():
         INSERT INTO oorder (shop_name, order_money, cons_phone, cons_name, cons_addre, create_time)
         VALUES (:shop_name, :order_money, :cons_phone, :cons_name, :cons_addre, :create_time)
     ''')
-    db.session.execute(sql_insert_oorder, {
-        'shop_name': shopname,
-        'order_money': ordermoney,
-        'cons_phone': consphone,
-        'cons_name': consname,
-        'cons_addre': consaddre,
-        'create_time': create_time
-    })
+    for _ in range(quantity):
+        db.session.execute(sql_insert_oorder, {
+            'shop_name': shopname,
+            'order_money': ordermoney,
+            'cons_phone': consphone,
+            'cons_name': consname,
+            'cons_addre': consaddre,
+            'create_time': create_time
+        })
     db.session.commit()
     # db.session.execute('insert into fastfood_shop(shop_name, price, m_sale_v) values("解耦哎",10,100)')
     # db.session.commit()
@@ -218,6 +220,7 @@ def get_token_phone(token):
     return (phone)
 
 
+# 用户界面未送达订单
 @app.route("/api/user/unsend", methods=["POST", "GET", "DELETE"])
 @cross_origin()
 def user_unsend():
@@ -259,9 +262,9 @@ def user_sending():
         Data = []
         for i in range(len(data)):
             dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2],
-                       cons_phone=data[i][4],
-                       cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8],
-                       disp_phone=data[i][9])
+                       cons_phone=data[i][3],
+                       cons_name=data[i][4], cons_addre=data[i][5], disp_id=data[i][6], deliver_time=data[i][7],
+                       disp_phone=data[i][8])
             Data.append(dic)
         return jsonify(status=200, tabledata=Data)
 
@@ -275,9 +278,9 @@ def user_sended():
         Data = []
         for i in range(len(data)):
             dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2],
-                       cons_phone=data[i][4],
-                       cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8],
-                       disp_phone=data[i][9])
+                       cons_phone=data[i][3],
+                       cons_name=data[i][4], cons_addre=data[i][5], disp_id=data[i][6], deliver_time=data[i][7],
+                       disp_phone=data[i][8])
             Data.append(dic)
         return jsonify(status=200, tabledata=Data)
 
@@ -496,20 +499,27 @@ def manager_unsend():
             dic = dict(disp_id=disp_range[i][0])
             Disp_range.append(dic)
         return jsonify(status=200, tabledata=Data, disp_range=Disp_range)
+
     if request.method == 'POST':
         rq = request.json
-        order_id = rq.get('order_id')
+        order_ids = rq.get('order_ids')  # 这里改为 order_ids 列表
         disp_id = rq.get('dispatcher_id')
         deliver_time = rq.get('deliver_time')
-        cons_phone = db.session.execute(
-            text('select cons_phone from oorder where order_id="%d"' % int(order_id))).first()
 
-        db.session.execute(text('insert wuliu( order_id, cons_phone,disp_id,deliver_time) value(%d,"%s","%s","%s")' % (
-            int(order_id), cons_phone[0], disp_id, deliver_time)))
+        for order_id in order_ids:
+            cons_phone = db.session.execute(
+                text('select cons_phone from oorder where order_id=:order_id').params(order_id=order_id)).first()
+            db.session.execute(
+                text(
+                    'insert into wuliu(order_id, cons_phone, disp_id, deliver_time) values(:order_id, :cons_phone, :disp_id, :deliver_time)')
+                .params(order_id=order_id, cons_phone=cons_phone[0], disp_id=disp_id, deliver_time=deliver_time)
+            )
+
         db.session.commit()
         return jsonify(status=200, msg="成功派发")
 
 
+# 管理员已发货订单
 @app.route("/api/manager/sending", methods=["GET"])
 @cross_origin()
 def manager_sending():
@@ -518,8 +528,8 @@ def manager_sending():
         Data = []
         for i in range(len(data)):
             dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2],
-                       cons_phone=data[i][4],
-                       cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8])
+                       cons_phone=data[i][3],
+                       cons_name=data[i][4], cons_addre=data[i][5], disp_id=data[i][6], deliver_time=data[i][7])
             Data.append(dic)
         return jsonify(status=200, tabledata=Data)
 
@@ -536,6 +546,36 @@ def manager_sended():
                        cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8])
             Data.append(dic)
         return jsonify(status=200, tabledata=Data)
+
+
+# 管理员物流界面确认收货
+@app.route("/api/user/confirm-receipt", methods=["POST"])
+@cross_origin()
+def confirm_receipt():
+    rq = request.json
+    order_id = rq.get('order_id')
+    actual_deliver_time = rq.get('actual_deliver_time')
+    if not order_id:
+        return jsonify(status=400, msg="订单ID缺失")
+    if not actual_deliver_time:
+        return jsonify(status=400, msg="实际送餐时间缺失")
+
+    try:
+        # 检查订单是否存在
+        exist = db.session.execute(text('select * from oorder where order_id="%s"' % order_id)).fetchall()
+        if not exist:
+            return jsonify(status=404, msg="订单不存在")
+
+        # 更新订单的checked字段为2
+        db.session.execute(text('update oorder set checked=2 where order_id="%s"' % order_id))
+        # 更新wuliu表的ended字段为1和deliver_time为实际送餐时间（分钟）
+        db.session.execute(text('update wuliu set ended=1, deliver_time=:actual_deliver_time where order_id=:order_id'),
+                           {'order_id': order_id, 'actual_deliver_time': actual_deliver_time})
+        db.session.commit()
+        return jsonify(status=200, msg="确认收货成功")
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(status=500, msg="数据库错误", error=str(e))
 
 
 if __name__ == '__main__':

@@ -23,9 +23,11 @@
 </template>
 
 <script>
+import { EventBus } from '@/eventBus'; // 引入事件总线
 export default {
     created() {
         this.getdata()
+        EventBus.$on('orderSended', this.getdata); // 监听订单收货事件
     },
     data() {
         return {
@@ -43,6 +45,9 @@ export default {
             })
         },
 
+    },
+    beforeDestroy() {
+        EventBus.$off('orderSended', this.getdata); // 组件销毁前取消事件监听
     }
 }
 </script>
