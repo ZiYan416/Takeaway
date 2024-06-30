@@ -1,0 +1,23 @@
+{
+  "id": "4603142",
+  "name": "TAKEAWAY",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "9358686",
+      "name": "manager",
+      "font_class": "manager",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "399044",
+      "name": "food",
+      "font_class": "food",
+      "unicode": "e6d0",
+      "unicode_decimal": 59088
+    }
+  ]
+}

@@ -12,12 +12,8 @@
                 <el-table-column prop="disp_id" label="送餐员编号" width="200" align="center">
                 </el-table-column>
                 <el-table-column prop="deliver_time" label="送餐时间" width="200" align="center">
-
                 </el-table-column>
-
             </el-table>
-
-
         </div>
     </div>
 </template>
@@ -32,7 +28,6 @@ export default {
     data() {
         return {
             tableData: [],
-
         }
     },
     methods: {
@@ -40,11 +35,32 @@ export default {
             this.$axios.get("/api/manager/wuliu?id=1").then((res) => {
                 console.log(res.data);
                 if (res.data.status == 200) {
-                    this.tableData = res.data.tabledata;
+                    this.tableData = this.summarizeOrders(res.data.tabledata);
                 }
             })
         },
-
+        summarizeOrders(orders) {
+            const summary = {};
+            orders.forEach(order => {
+                const key = `${order.cons_phone}-${order.disp_id}-${order.deliver_time}`;
+                if (!summary[key]) {
+                    summary[key] = {
+                        ...order,
+                        order_ids: [order.order_id]
+                    };
+                } else {
+                    summary[key].order_ids.push(order.order_id);
+                }
+            });
+            return Object.values(summary).map(order => {
+                if (order.order_ids.length === 1) {
+                    order.order_id = order.order_ids[0].toString();  // 单独订单显示单个ID
+                } else {
+                    order.order_id = `${order.order_ids[0]}-${order.order_ids[order.order_ids.length - 1]}`;  // 多个订单显示范围
+                }
+                return order;
+            });
+        }
     },
     beforeDestroy() {
         EventBus.$off('orderSended', this.getdata); // 组件销毁前取消事件监听
@@ -64,7 +80,6 @@ export default {
 }
 
 .body {
-
     width: 62%;
     margin: auto;
     margin-top: 30px;

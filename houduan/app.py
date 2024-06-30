@@ -234,22 +234,26 @@ def user_unsend():
                        cons_name=data[i][4], cons_addre=data[i][5], create_time=data[i][7])
             Data.append(dic)
         return jsonify(status=200, tabledata=Data)
+
     if request.method == 'POST':
         rq = request.json
-        order_id = rq.get("order_id")
+        order_ids = rq.get("order_ids")
         cons_name = rq.get("cons_name")
         cons_addre = rq.get("cons_addre")
-        print(order_id)
-        db.session.execute(
-            text('update oorder set cons_name="%s", cons_addre="%s" where order_id="%d"' % (
-                cons_name, cons_addre, order_id)))
+        for order_id in order_ids:
+            db.session.execute(
+                text('update oorder set cons_name=:cons_name, cons_addre=:cons_addre where order_id=:order_id'),
+                {'cons_name': cons_name, 'cons_addre': cons_addre, 'order_id': order_id}
+            )
         db.session.commit()
-        return jsonify(status=200, msg="修改成功")
+        return jsonify(status=200, msg="订单信息修改成功")
+
     if request.method == 'DELETE':
-        order_id = request.json.get("delete_id")
-        db.session.execute(text('delete from oorder where order_id="%d" ' % order_id))
+        delete_ids = request.json.get("delete_ids")
+        for order_id in delete_ids:
+            db.session.execute(text('delete from oorder where order_id=:order_id'), {'order_id': order_id})
         db.session.commit()
-        return jsonify(status=200, msg="删除成功")
+        return jsonify(status=200, msg="订单删除成功")
 
 
 @app.route("/api/user/sending", methods=["POST", "GET", "DELETE"])
@@ -534,7 +538,7 @@ def manager_sending():
         return jsonify(status=200, tabledata=Data)
 
 
-@app.route("/api/manager/sended", methods=["GET"])
+@app.route("/api/manager/sended", methods=["GET", "DELETE"])
 @cross_origin()
 def manager_sended():
     if request.method == 'GET':
@@ -542,10 +546,15 @@ def manager_sended():
         Data = []
         for i in range(len(data)):
             dic = dict(order_id=data[i][0], shop_name=data[i][1], order_money=data[i][2],
-                       cons_phone=data[i][4],
-                       cons_name=data[i][5], cons_addre=data[i][6], disp_id=data[i][7], deliver_time=data[i][8])
+                       cons_phone=data[i][3],
+                       cons_name=data[i][4], cons_addre=data[i][5], disp_id=data[i][6], deliver_time=data[i][7])
             Data.append(dic)
         return jsonify(status=200, tabledata=Data)
+    if request.method == 'DELETE':
+        order_id = request.json.get("order_id")
+        db.session.execute(text('delete from sended_order where order_id=:order_id'), {'order_id': int(order_id)})
+        db.session.commit()
+        return jsonify(status=200, msg="删除成功")
 
 
 # 管理员物流界面确认收货
@@ -553,29 +562,33 @@ def manager_sended():
 @cross_origin()
 def confirm_receipt():
     rq = request.json
-    order_id = rq.get('order_id')
+    order_ids = rq.get('order_ids')
     actual_deliver_time = rq.get('actual_deliver_time')
-    if not order_id:
+
+    if not order_ids:
         return jsonify(status=400, msg="订单ID缺失")
     if not actual_deliver_time:
         return jsonify(status=400, msg="实际送餐时间缺失")
 
     try:
-        # 检查订单是否存在
-        exist = db.session.execute(text('select * from oorder where order_id="%s"' % order_id)).fetchall()
-        if not exist:
-            return jsonify(status=404, msg="订单不存在")
+        for order_id in order_ids:
+            # 检查订单是否存在
+            exist = db.session.execute(text('select * from oorder where order_id=:order_id'), {'order_id': order_id}).fetchall()
+            if not exist:
+                return jsonify(status=404, msg=f"订单 {order_id} 不存在")
 
-        # 更新订单的checked字段为2
-        db.session.execute(text('update oorder set checked=2 where order_id="%s"' % order_id))
-        # 更新wuliu表的ended字段为1和deliver_time为实际送餐时间（分钟）
-        db.session.execute(text('update wuliu set ended=1, deliver_time=:actual_deliver_time where order_id=:order_id'),
-                           {'order_id': order_id, 'actual_deliver_time': actual_deliver_time})
+            # 更新订单的checked字段为2
+            db.session.execute(text('update oorder set checked=2 where order_id=:order_id'), {'order_id': order_id})
+            # 更新wuliu表的ended字段为1和deliver_time为实际送餐时间（分钟）
+            db.session.execute(text('update wuliu set ended=1, deliver_time=:actual_deliver_time where order_id=:order_id'),
+                               {'order_id': order_id, 'actual_deliver_time': actual_deliver_time})
+
         db.session.commit()
         return jsonify(status=200, msg="确认收货成功")
     except Exception as e:
         db.session.rollback()
         return jsonify(status=500, msg="数据库错误", error=str(e))
+
 
 
 if __name__ == '__main__':

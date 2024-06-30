@@ -1,65 +1,66 @@
 <template>
-    <div class="container">
-        <div class="login_box">
-            <div class="head">
-                外卖管理系统
-            </div>
-            <!-- 登录 -->
-            <div v-show="target == 1">
-                <el-form label-width="0" class="login_form" :model="login_form" :rules="login_rules" ref="login_form">
-                    <!-- 用户名 -->
-                    <el-form-item prop="userortel">
-                        <el-input v-model="login_form.userortel" spellcheck="false" placeholder="手机号">
-                        </el-input>
-                    </el-form-item>
-                    <!-- 密码 -->
-                    <el-form-item prop="password">
-                        <el-input v-model="login_form.password" show-password spellcheck="false" placeholder="密码">
-                        </el-input>
-                    </el-form-item>
+        <div class="container">
+            <div class="login_box">
+                <div class="head">
+                    <i class="icon iconfont icon-food"></i>外卖管理系统
+                </div>
+                <!-- 登录 -->
+                <div v-show="target == 1">
+                    <el-form label-width="0" class="login_form" :model="login_form" :rules="login_rules"
+                        ref="login_form">
+                        <!-- 用户名 -->
+                        <el-form-item prop="userortel">
+                            <el-input v-model="login_form.userortel" spellcheck="false" placeholder="手机号">
+                            </el-input>
+                        </el-form-item>
+                        <!-- 密码 -->
+                        <el-form-item prop="password">
+                            <el-input v-model="login_form.password" show-password spellcheck="false" placeholder="密码">
+                            </el-input>
+                        </el-form-item>
 
 
-                    <!-- 按钮 -->
-                    <el-form-item class="btns">
-                        <el-button type="primary" @click="llogin()">登录</el-button>
-                    </el-form-item>
+                        <!-- 按钮 -->
+                        <el-form-item class="btns">
+                            <el-button type="primary" @click="llogin()">登录</el-button>
+                        </el-form-item>
 
-                </el-form>
-                <div>
-                    <div class="operate">
-                        <span id="op1" @click="change(2)">注册</span>
-                        <span id="op2" @click="change(3)">忘记密码</span>
+                    </el-form>
+                    <div>
+                        <div class="operate">
+                            <span id="op1" @click="change(2)">注册</span>
+                            <span id="op2" @click="change(3)">忘记密码</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
 
-        <!-- 注册表单 -->
-        <div class="reg_box" v-show="target == 2">
-            <div class="head">
-                外卖管理系统
-            </div>
-            <div>
-                <el-form class="reg_form" :model="reg_form" :rules="reg_rules" ref="reg_form">
-                    <!-- 用户名 -->
-                    <el-form-item prop="username">
-                        <el-input prefix-icon="iconfont icon-user" v-model="reg_form.username" spellcheck="false"
-                            placeholder="用户名">
-                        </el-input>
-                    </el-form-item>
-                    <!-- 密码 -->
-                    <el-form-item prop="password">
-                        <el-input prefix-icon="iconfont icon-password" v-model="reg_form.password" show-password
-                            spellcheck="false" placeholder="密码(包含大小写字母、数字，长度在6-12之间)"></el-input>
-                    </el-form-item>
+            <!-- 注册表单 -->
+            <div class="reg_box" v-show="target == 2">
+                <div class="head">
+                    <i class="icon iconfont icon-food"></i>外卖管理系统
+                </div>
+                <div>
+                    <el-form class="reg_form" :model="reg_form" :rules="reg_rules" ref="reg_form">
+                        <!-- 用户名 -->
+                        <el-form-item prop="username">
+                            <el-input prefix-icon="iconfont icon-user" v-model="reg_form.username" spellcheck="false"
+                                placeholder="用户名">
+                            </el-input>
+                        </el-form-item>
+                        <!-- 密码 -->
+                        <el-form-item prop="password">
+                            <el-input prefix-icon="iconfont icon-password" v-model="reg_form.password" show-password
+                                spellcheck="false" placeholder="密码(包含大小写字母、数字，长度在6-12之间)"></el-input>
+                        </el-form-item>
 
-                    <el-form-item prop="telephone">
-                        <el-input prefix-icon="iconfont icon-password" v-model="reg_form.telephone" spellcheck="false"
-                            placeholder="手机号码"></el-input>
-                    </el-form-item>
+                        <el-form-item prop="telephone">
+                            <el-input prefix-icon="iconfont icon-password" v-model="reg_form.telephone"
+                                spellcheck="false" placeholder="手机号码"></el-input>
+                        </el-form-item>
 
-                    <!-- <el-form-item prop="vercode">
+                        <!-- <el-form-item prop="vercode">
                         <el-input v-model="reg_form.vercode" spellcheck="false" placeholder="验证码" style="width:230px">
                         </el-input>
                         <span style="width:120px;font-size: 16px;cursor: pointer;" @click="send_vercode_pre()"
@@ -70,42 +71,42 @@
                         <!-- <span style="width:120px;font-size: 16px;cursor: pointer;" v-show="!getcode_show">
                             {{ time_count }}s后重新获取
                         </span> -->
-                    <!-- </el-form-item> -->
-                    <!-- 按钮 -->
-                    <el-form-item class="btns">
-                        <el-button type="primary" @click="zhuce()">注册</el-button>
-                    </el-form-item>
+                        <!-- </el-form-item> -->
+                        <!-- 按钮 -->
+                        <el-form-item class="btns">
+                            <el-button type="primary" @click="zhuce()">注册</el-button>
+                        </el-form-item>
 
-                </el-form>
-                <div>
+                    </el-form>
                     <div>
-                        <span @click="change(1)"
-                            style="margin-left:210px;color: #000;opacity: .5;font-weight: 400;font-size: 16px;cursor:pointer;">登录</span>
+                        <div>
+                            <span @click="change(1)"
+                                style="margin-left:210px;color: #000;opacity: .5;font-weight: 400;font-size: 16px;cursor:pointer;">登录</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-<!-- 找回密码 -->
-        <div class="forget_box" v-show="target == 3">
-            <div class="head">
-                外卖管理系统
-            </div>
-            <div>
-                <el-form class="reg_form" :model="findback_form" :rules="findback_rules" ref="findback_form">
+            <!-- 找回密码 -->
+            <div class="forget_box" v-show="target == 3">
+                <div class="head">
+                    <i class="icon iconfont icon-food"></i>外卖管理系统
+                </div>
+                <div>
+                    <el-form class="reg_form" :model="findback_form" :rules="findback_rules" ref="findback_form">
 
 
 
-                    <el-form-item prop="telephone">
-                        <el-input prefix-icon="iconfont icon-password" v-model="reg_form.telephone" spellcheck="false"
-                            placeholder="手机号码"></el-input>
-                    </el-form-item>
-                    <!-- 密码 -->
-                    <el-form-item prop="password">
-                        <el-input prefix-icon="iconfont icon-password" v-model="reg_form.password" show-password
-                            spellcheck="false" placeholder="新密码"></el-input>
-                    </el-form-item>
+                        <el-form-item prop="telephone">
+                            <el-input prefix-icon="iconfont icon-password" v-model="reg_form.telephone"
+                                spellcheck="false" placeholder="手机号码"></el-input>
+                        </el-form-item>
+                        <!-- 密码 -->
+                        <el-form-item prop="password">
+                            <el-input prefix-icon="iconfont icon-password" v-model="reg_form.password" show-password
+                                spellcheck="false" placeholder="新密码"></el-input>
+                        </el-form-item>
 
-                    <!-- <el-form-item prop="vercode">
+                        <!-- <el-form-item prop="vercode">
                         <el-input v-model="reg_form.vercode" spellcheck="false" placeholder="验证码" style="width:230px">
                         </el-input>
                         <span style="width:120px;font-size: 16px;cursor: pointer;" @click="send_vercode_pre()"
@@ -117,21 +118,21 @@
                             {{ time_count }}s后重新获取
                         </span>
                     </el-form-item> -->
-                    <!-- 按钮 -->
-                    <el-form-item class="btns">
-                        <el-button type="primary" @click="findback()">确认修改</el-button>
-                    </el-form-item>
+                        <!-- 按钮 -->
+                        <el-form-item class="btns">
+                            <el-button type="primary" @click="findback()">确认修改</el-button>
+                        </el-form-item>
 
-                </el-form>
-                <div>
+                    </el-form>
                     <div>
-                        <span @click="change(1)"
-                            style="margin-left:210px;color: #000;opacity: .5;font-weight: 400;font-size: 16px;cursor:pointer;">登录</span>
+                        <div>
+                            <span @click="change(1)"
+                                style="margin-left:210px;color: #000;opacity: .5;font-weight: 400;font-size: 16px;cursor:pointer;">登录</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 </template>
 
 <script>
@@ -172,7 +173,7 @@ export default {
             findback_form: {
                 userortel: '',
                 password: '',
-                vercode:'',
+                vercode: '',
             },
             login_rules: {
                 userortel: [
@@ -194,54 +195,53 @@ export default {
         }
     },
     methods: {
-        findback(){
+        findback() {
             this.$refs.findback_form.validate(valid => {
                 if (!valid)
                     return;
-                else if(this.findback_form.vercode=='')
+                else if (this.findback_form.vercode == '')
                     return;
-                else{
+                else {
                     console.log(111);
                 }
             })
         },
-        zhuce(){
+        zhuce() {
             this.$refs.reg_form.validate(valid => {
                 if (!valid)
                     return;
-                else{
-                    if(this.reg_form.vercode=='')
+                else {
+                    if (this.reg_form.vercode == '')
                         return;
-                    else{
+                    else {
                         this.$axios.request({
-                            method:'POST',
-                            url:'/api/user/register/test',
-                            data:{
-                                username:this.reg_form.username,
-                                password:this.reg_form.password,
+                            method: 'POST',
+                            url: '/api/user/register/test',
+                            data: {
+                                username: this.reg_form.username,
+                                password: this.reg_form.password,
                                 // vercode:this.reg_form.vercode,
-                                telephone:this.reg_form.telephone
+                                telephone: this.reg_form.telephone
                             }
-                        }).then((res)=>{
+                        }).then((res) => {
                             console.log(res.status);
-                            if(res.data.status==200)
-                            {
+                            if (res.data.status == 200) {
                                 this.$message({
-                                message: '注册成功',
-                                type: 'success'
+                                    message: '注册成功',
+                                    type: 'success'
                                 })
-                            this.target = 1;
-                            // 页面变为登录页面
-                            }else{
+                                this.target = 1;
+                                // 页面变为登录页面
+                            } else {
                                 this.$message({
-                                message: res.data.msg,
-                                type: 'error'
+                                    message: res.data.msg,
+                                    type: 'error'
                                 })
-                            
+
                             }
-                            
+
                         })
-                
+
                     }
                 }
             })
@@ -312,15 +312,15 @@ export default {
                     telephone: this.reg_form.telephone
                 }
             }).then(() => {
-                
-                this.$message({
-                        message: '验证码发送成功',
-                        type: 'success'
-                    })
 
-                
-                    
-                
+                this.$message({
+                    message: '验证码发送成功',
+                    type: 'success'
+                })
+
+
+
+
             })
         },
         set_interval() {
@@ -345,10 +345,13 @@ export default {
 </script>
 
 <style lang="less" scoped>
+
 .container {
-    background-color: #2b4b6b;
+    background:url("../assets/img/bg01.png");
+    // background-color: #2b4b6b;
     height: 100%;
     width: 100%;
+    background-size:100% 100%;
 }
 
 .head {
@@ -362,33 +365,67 @@ export default {
     height: 300px;
     width: 450px;
     background-color: white;
-    border-radius: 3px;
+    border-radius: 3%;
     position: absolute;
     top: 50%;
     left: 50%;
+    // color: #ffffff;
+	backdrop-filter: blur(4px);
+	box-shadow: inset 1px 1px 6px rgba(255, 255, 255, 0.3),
+		2px 2px 15px rgba(0, 0, 0, 0.5);
     transform: translate(-50%, -50%);
+    transition: all 0.4s ease 0s;
+}
+
+.login_box:hover {
+    box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.9),
+		4px 4px 25px rgba(0, 0, 0, 0.9);
+	backdrop-filter: blur(7px);
+    transition: all 0.4s ease 0s;
 }
 
 .reg_box {
     height: 400px;
     width: 450px;
     background-color: white;
-    border-radius: 3px;
+    border-radius: 3%;
     position: absolute;
     top: 50%;
     left: 50%;
+    backdrop-filter: blur(4px);
+	box-shadow: inset 1px 1px 6px rgba(255, 255, 255, 0.3),
+		2px 2px 15px rgba(0, 0, 0, 0.5);
     transform: translate(-50%, -50%);
+    transition: all 0.4s ease 0s;
+}
+
+.reg_box:hover {
+    box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.9),
+		4px 4px 25px rgba(0, 0, 0, 0.9);
+	backdrop-filter: blur(7px);
+    transition: all 0.4s ease 0s;
 }
 
 .forget_box {
     height: 350px;
     width: 450px;
     background-color: white;
-    border-radius: 3px;
+    border-radius: 3%;
     position: absolute;
     top: 50%;
     left: 50%;
+    backdrop-filter: blur(4px);
+	box-shadow: inset 1px 1px 6px rgba(255, 255, 255, 0.3),
+		2px 2px 15px rgba(0, 0, 0, 0.5);
     transform: translate(-50%, -50%);
+    transition: all 0.4s ease 0s;
+}
+
+.forget_box:hover {
+    box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.9),
+		4px 4px 25px rgba(0, 0, 0, 0.9);
+	backdrop-filter: blur(7px);
+    transition: all 0.4s ease 0s;
 }
 
 .input {

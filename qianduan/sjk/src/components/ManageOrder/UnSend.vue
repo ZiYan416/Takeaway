@@ -7,21 +7,23 @@
             <el-table :data="tableData" style="width: 100%" class="table" border>
                 <el-table-column prop="order_id" label="订单编号" width="80" align="center">
                 </el-table-column>
-                <el-table-column prop="shop_name" label="店铺" width="100" align="center">
+                <el-table-column prop="shop_name" label="店铺" width="140" align="center">
                 </el-table-column>
-                <el-table-column prop="price" label="订单价格" width="80" align="center">
+                <el-table-column prop="price" label="订单单价" width="80" align="center">
                 </el-table-column>
-                <el-table-column prop="create_time" label="下单时间" width="200" align="center">
+                <el-table-column prop="quantity" label="订单数量" width="100" align="center">
                 </el-table-column>
-                <!-- <el-table-column prop="orderway" label="订餐方式" width="100" align="center">
-                </el-table-column> -->
-                <el-table-column prop="cons_phone" label="订餐人电话" width="200" align="center">
+                <el-table-column prop="total_price" label="订单总价" width="100" align="center">
+                </el-table-column>
+                <el-table-column prop="create_time" label="下单时间" width="190" align="center">
+                </el-table-column>
+                <el-table-column prop="cons_phone" label="订餐人电话" width="140" align="center">
                 </el-table-column>
                 <el-table-column prop="cons_name" label="订餐人姓名" width="100" align="center">
                 </el-table-column>
-                <el-table-column prop="cons_addre" label="取餐地址" width="200" align="center">
+                <el-table-column prop="cons_addre" label="取餐地址" width="180" align="center">
                 </el-table-column>
-                <el-table-column prop="operate" label="派发订单" width="127" align="center">
+                <el-table-column prop="operate" label="派发订单" width="120" align="center">
                     <template slot-scope="scope">
                         <el-button size="small" type="success" @click="show_dialog(scope.row)">派发此订单
                         </el-button>
@@ -30,27 +32,22 @@
             </el-table>
 
             <el-dialog title="派发订单" :visible.sync="dialog" width="30%">
-                <el-form ref="form" :model="form" label-width="120px">
-
+                <el-form ref="form" :model="form" label-width="180px">
                     <el-form-item label="选择送餐员：" prop="">
                         <el-select v-model="form.dispatcher_id" placeholder="请选择送餐员编号">
-
-                            <el-option v-for="(item, index)  in disp_range" :key="index" :label="item.disp_id"
-                                :value="item.disp_id"></el-option>
+                            <el-option v-for="(item, index)  in disp_range" :key="index" :label="item.disp_id" :value="item.disp_id"></el-option>
                         </el-select>
-
                     </el-form-item>
                     <el-form-item label="预计送货时间（分钟）：">
                         <el-input v-model="form.deliver_time"></el-input>
                     </el-form-item>
                 </el-form>
                 <div style="text-align: center;">
-                    <el-button type="primary" @click="add()">
+                    <el-button type="primary" @click="validateDeliverTime">
                         确定派发
                     </el-button>
                 </div>
             </el-dialog>
-
         </div>
     </div>
 </template>
@@ -91,11 +88,13 @@ export default {
                     summary[key] = {
                         ...order,
                         order_ids: [order.order_id],
-                        total_price: order.price
+                        total_price: order.price,
+                        quantity: 1
                     };
                 } else {
                     summary[key].order_ids.push(order.order_id);
                     summary[key].total_price += order.price;
+                    summary[key].quantity += 1;
                 }
             });
             return Object.values(summary).map(order => {
@@ -104,7 +103,6 @@ export default {
                 } else {
                     order.order_id = `${order.order_ids[0]}-${order.order_ids[order.order_ids.length - 1]}`;  // 多个订单显示范围
                 }
-                order.price = order.total_price; // 显示总价格
                 return order;
             });
         },
@@ -117,6 +115,16 @@ export default {
             }
             this.form.order_ids = order_ids;
             this.dialog = true;
+        },
+        validateDeliverTime() {
+            const deliverTimePattern = /^[1-9]\d*分钟$/;
+            if (!this.form.dispatcher_id) {
+                this.$message.error('请选择送餐员');
+            } else if (!deliverTimePattern.test(this.form.deliver_time)) {
+                this.$message.error('请输入有效的预计送货时间（分钟）');
+            } else {
+                this.add();
+            }
         },
         add() {
             const formData = {
@@ -142,14 +150,10 @@ export default {
             })
         }
     }
-
-
 }
 </script>
 
-
 <style scoped>
-
 .header {
     width: 100%;
     height: 10%;
@@ -161,7 +165,7 @@ export default {
 }
 
 .body {
-    width: 91%;
+    width: 88%;
     margin: auto;
     margin-top: 30px;
 }

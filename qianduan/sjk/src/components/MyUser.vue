@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="header">
-            &nbsp;&nbsp; 外卖管理系统
+            &nbsp;&nbsp; <i class="icon iconfont icon-food"></i>外卖管理系统
         </div>
         <div class="body">
             <!-- 左侧导航栏 -->
@@ -183,15 +183,16 @@ export default {
     height: 10vh;
     /* text-align: center; */
     line-height: 10vh;
-    font-size: 25px;
+    font-size: 28px;
+    letter-spacing: 1px;
     font-weight: 800;
-    background-color: #e3e3e3;
+    background-color: white;
     /* padding-left: 100px; */
 }
 
 .body {
     width: 100%;
-    height: 648px;
+    height: 90vh;
     display: flex;
     justify-content: space-around;
 }
@@ -203,6 +204,8 @@ export default {
 }
 
 .main {
+    background:url("../assets/img/bg02.png");
     width: 85%;
+    background-size:100% 100%;
 }
 </style>

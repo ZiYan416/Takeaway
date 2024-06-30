@@ -19,8 +19,6 @@
                     </template>
                 </el-table-column>
             </el-table>
-
-
         </div>
     </div>
 </template>
@@ -35,7 +33,6 @@ export default {
     data() {
         return {
             tableData: [],
-
         }
     },
     methods: {
@@ -43,9 +40,32 @@ export default {
             this.$axios.get("/api/manager/wuliu?id=0").then((res) => {
                 console.log(res.data);
                 if (res.data.status == 200) {
-                    this.tableData = res.data.tabledata;
+                    this.tableData = this.summarizeOrders(res.data.tabledata);
                 }
             })
+        },
+
+        summarizeOrders(orders) {
+            const summary = {};
+            orders.forEach(order => {
+                const key = `${order.cons_phone}-${order.disp_id}-${order.deliver_time}`;
+                if (!summary[key]) {
+                    summary[key] = {
+                        ...order,
+                        order_ids: [order.order_id]
+                    };
+                } else {
+                    summary[key].order_ids.push(order.order_id);
+                }
+            });
+            return Object.values(summary).map(order => {
+                if (order.order_ids.length === 1) {
+                    order.order_id = order.order_ids[0].toString();  // 单独订单显示单个ID
+                } else {
+                    order.order_id = `${order.order_ids[0]}-${order.order_ids[order.order_ids.length - 1]}`;  // 多个订单显示范围
+                }
+                return order;
+            });
         },
 
         confirmReceipt(row) {
@@ -55,14 +75,14 @@ export default {
                 inputPattern: /^[1-9]\d*分钟$/,
                 inputErrorMessage: '请输入有效的分钟数'
             }).then(({ value }) => {
+                const order_ids = row.order_ids;
                 this.$axios.post("/api/user/confirm-receipt", {
-                    order_id: row.order_id,
+                    order_ids: order_ids,
                     actual_deliver_time: value
                 }).then((res) => {
                     if (res.data.status == 200) {
                         this.$message.success('确认收货成功');
                         this.getdata(); // 刷新表格数据
-
                         // 收货成功后，发送事件通知WuliuEnded组件更新
                         EventBus.$emit('orderSended');
                     } else if (res.data.status == 400) {
@@ -81,7 +101,7 @@ export default {
         }
     },
     beforeDestroy() {
-        EventBus.$off('orderDispatched', this.getdata); // 组件销毁前取消事件监听
+        EventBus.$off('orderSending', this.getdata); // 组件销毁前取消事件监听
     }
 }
 </script>
@@ -98,7 +118,6 @@ export default {
 }
 
 .body {
-
     width: 68%;
     margin: auto;
     margin-top: 30px;
