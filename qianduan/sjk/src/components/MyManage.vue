@@ -1,7 +1,11 @@
 <template>
     <div>
         <div class="header">
-            &nbsp;&nbsp; <i class="icon iconfont icon-manager"></i>外卖管理系统——后台管理
+            <!-- &nbsp;&nbsp;  -->
+            <a class="logo"><i class="icon iconfont icon-manager"></i>外卖管理系统——后台管理</a>
+            <nav class="navbar"><p>数据库小组作业 <br>
+                成员：宋子杰、刘睿、吕瀚林
+            </p></nav>
         </div>
         <div class="body">
             <div class="liner">
@@ -154,12 +158,26 @@ export default {
     width: 100%;
     height: 10vh;
     /* text-align: center; */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     line-height: 10vh;
     font-size: 28px;
     letter-spacing: 1px;
     font-weight: 800;
     background-color: white;
     /* padding-left: 100px; */
+}
+
+.logo {
+    margin-left: 2%;
+}
+
+.navbar {
+    margin-right: 2%;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 16px;
 }
 
 .body {

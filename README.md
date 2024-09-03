@@ -2,7 +2,7 @@
 
 ### 启动前端
 
-VS Code调出终端输入 `npm run serve` 运行Vue项目
+VS Code调出终端输入 `npm run serve` 运行Vue项目（需先安装必要依赖）
 
 ### 打开数据库
 
@@ -14,5 +14,5 @@ VS Code调出终端输入 `npm run serve` 运行Vue项目
 
 ### 启动后端
 
-打开PyCharm，打开终端输入 `python app.py` 启动后端
+打开PyCharm，打开终端输入 `python app.py` 启动后端（需先安装必要依赖）
 

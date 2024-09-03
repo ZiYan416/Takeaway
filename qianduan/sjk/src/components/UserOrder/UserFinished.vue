@@ -5,23 +5,23 @@
         </div>
         <div class="body">
             <el-table :data="tableData" style="width: 100%" class="table" border>
-                <el-table-column prop="shop_name" label="店铺" width="140" align="center">
+                <el-table-column prop="shop_name" label="店铺" min-width="25%" align="center">
                 </el-table-column>
-                <el-table-column prop="order_money" label="订单单价" width="80" align="center">
+                <el-table-column prop="order_money" label="订单单价" min-width="15%" align="center">
                 </el-table-column>
-                <el-table-column prop="quantity" label="订单数量" width="80" align="center">
+                <el-table-column prop="quantity" label="订单数量" min-width="15%" align="center">
                 </el-table-column>
-                <el-table-column prop="total_price" label="订单总价" width="80" align="center">
+                <el-table-column prop="total_price" label="订单总价" min-width="15%" align="center">
                 </el-table-column>
-                <el-table-column prop="cons_name" label="订餐人姓名" width="140" align="center">
+                <el-table-column prop="cons_name" label="订餐人姓名" min-width="20%" align="center">
                 </el-table-column>
-                <el-table-column prop="cons_addre" label="取餐地址" width="180" align="center">
+                <el-table-column prop="cons_addre" label="取餐地址" min-width="40%" align="center">
                 </el-table-column>
-                <el-table-column prop="disp_id" label="送餐员编号" width="120" align="center">
+                <el-table-column prop="disp_id" label="送餐员编号" min-width="18%" align="center">
                 </el-table-column>
-                <el-table-column prop="disp_phone" label="送餐员电话" width="120" align="center">
+                <el-table-column prop="disp_phone" label="送餐员电话" min-width="20%" align="center">
                 </el-table-column>
-                <el-table-column prop="deliver_time" label="实际送餐时间" width="116" align="center">
+                <el-table-column prop="deliver_time" label="实际送餐时间" min-width="20%" align="center">
                 </el-table-column>
             </el-table>
         </div>

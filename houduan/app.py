@@ -1,11 +1,12 @@
 # import caching as caching
 from flask import Flask, jsonify, request
 from sqlalchemy import text
-
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from config import BaseConfig
 from flask_sqlalchemy import SQLAlchemy
 import auth
-# from aliyunsms.sms_send import send_sms
+
 import json
 import random
 import datetime
@@ -19,6 +20,9 @@ from flask_cors import CORS
 from flask_cors import cross_origin
 
 app = Flask(__name__)
+
+# 初始化密码加密哈希函数
+ph = PasswordHasher()
 
 # 添加配置数据库
 app.config.from_object(BaseConfig)
@@ -41,17 +45,23 @@ def user_login():
     print(request.json)
     userortel = request.json.get("userortel").strip()
     password = request.json.get("password").strip()
-    sql = ('select * ' \
-           + 'from user ' \
-           + 'where telephone = "{0}" and password = "{1}"').format(userortel, password)
-    data = db.session.execute(text(sql)).first()
+
+    # 查找用户信息
+    sql_check_user = text('select * from user where telephone = :telephone')
+    data = db.session.execute(sql_check_user, {'telephone': userortel}).first()
     print(data)
-    if data != None:
+
+    if data:
         user = {'id': data[0], 'username': data[1], 'password': data[2], 'telephone': data[3]}
-        # 生成token
-        token = auth.encode_func(user)
-        print(token)
-        return jsonify({"code": 200, "msg": "登录成功", "token": token, "role": data[4]})
+        try:
+            # 验证密码
+            ph.verify(user['password'], password)
+            # 生成token
+            token = auth.encode_func(user)
+            print(token)
+            return jsonify({"code": 200, "msg": "登录成功", "token": token, "role": data[4]})
+        except VerifyMismatchError:
+            return jsonify({"code": 1000, "msg": "用户名或密码错误"})
     else:
         return jsonify({"code": 1000, "msg": "用户名或密码错误"})
 
@@ -62,7 +72,6 @@ def user_login():
 def register():
     rq = request.json
     # 获取用户名、密码和手机号
-    # print("Received request:", rq)  # 添加日志打印
     username = rq.get("username").strip()
     password = rq.get("password").strip()
     telephone = rq.get("telephone").strip()
@@ -72,10 +81,13 @@ def register():
     data = db.session.execute(sql_check_user, {'telephone': telephone}).fetchall()
     if not data:
         try:
+            # 加密密码
+            hashed_password = ph.hash(password)
+
             # 插入新用户信息到数据库
             sql_insert_user = text(
                 'insert into user(username, password, telephone, role) values(:username, :password, :telephone, 0)')
-            db.session.execute(sql_insert_user, {'username': username, 'password': password, 'telephone': telephone})
+            db.session.execute(sql_insert_user, {'username': username, 'password': hashed_password, 'telephone': telephone})
 
             # 获取新插入用户的ID
             sql_get_user_id = text('select id from user where telephone = :telephone')
@@ -86,7 +98,6 @@ def register():
                 'insert into user_msg(id, real_name, sex, age, mail, phone, user_name) values(:id, NULL, NULL, NULL, '
                 'NULL, :telephone, :username)')
             db.session.execute(sql_insert_user_msg, {'id': user_id, 'telephone': telephone, 'username': username})
-            db.session.commit()
 
             db.session.commit()
             return jsonify({"status": 200, "msg": "注册成功"})
@@ -97,75 +108,7 @@ def register():
         return jsonify({"status": 1000, "msg": "该用户已存在"})
 
 
-# 用户注册__发送验证码
-# @app.route("/api/user/register/send_sms", methods=["POST"])
-# @cross_origin()
-# def register_sms():
-#     # print(request.json)
-#     phone = request.json.get("telephone")
-#     # print(str(phone))
-#     # params = {'code': '756821'}  # abcd就是发发送的验证码，code就是模板中定义的变量
-#     # print(params)
-#     # 生成随机的6位验证码
-#     num = random.randrange(100000, 999999)
-#     params = {'code': 123456}
-#     params['code'] = num
-#
-#     # 将验证码保存到redis中，第一个参数是key，第二个参数是value，第三个参数表示60秒后过期
-#     redis_store.set('valid_code:{}'.format(phone), num, 600)
-#     print(redis_store.get('valid_code:{}'.format(phone)))
-#     # 调用send_sms函数来发送短信验证码
-#     result = send_sms(str(phone), json.dumps(params))
-#     print(result)
-#     if result[3]:
-#         return jsonify({"code": "200", "msg": "验证码发送成功"})
-#     else:
-#         return jsonify({"code": '1000', "msg": "验证码发送失败"})
-
-
-# # 用户注册__检测验证码和手机是否在数据库中
-# @app.route("/api/user/findback", methods=["POST"])
-# @cross_origin()
-# def findback():
-#     rq = request.json
-#     # 获取验证码和手机号
-#     password = rq.get("password")
-#     vercode = rq.get("vercode")
-#     telephone = rq.get("telephone")
-#
-#     if vercode != redis_store.get('valid_code:{}'.format(telephone)):
-#         return jsonify({"status": "1000", "msg": "验证码错误"})
-
-
-# 用户注册__检测验证码和手机是否在数据库中
-# @app.route("/api/user/register/test", methods=["POST"])
-# @cross_origin()
-# def register_test():
-#     rq = request.json
-#     # 获取验证码和手机号
-#     username = rq.get("username")
-#     password = rq.get("password")
-#     vercode = rq.get("vercode")
-#     telephone = rq.get("telephone")
-#
-#     # 先判断验证码对错
-#     if vercode != redis_store.get('valid_code:{}'.format(telephone)):
-#         return jsonify({"status": "1000", "msg": "验证码错误"})
-#
-#     data = db.session.execute(text('select * from user where telephone="%s"' % telephone)).fetchall()
-#     if not data:
-#         db.session.execute(text('insert into user(username,password,telephone,role) value("%s","%s","%s",0)' % (
-#             username, password, telephone)))
-#         db.session.commit()
-#         return jsonify({"status": "200", "msg": "注册成功"})
-#     else:
-#         return jsonify({"status": "1000", "msg": "该用户已存在"})
-
-
-# 用户界面获取店铺信息
-
-#获取店铺列表
-
+# 获取店铺列表
 @app.route("/api/user/shop", methods=["GET"])
 @cross_origin()
 def user_get_shop():
@@ -342,17 +285,37 @@ def user_msg_chg():
 @cross_origin()
 def user_pwd_chg():
     if request.method == 'POST':
-        pwd = request.json.get('new_pwd')
+        new_pwd = request.json.get('new_pwd')
         old_pwd = request.json.get('old_pwd')
         phone = get_token_phone(request.headers.get('token'))
-        data = db.session.execute(
-            text('select * from user where telephone="%s" and password="%s"' % (phone, old_pwd))).fetchall()
+
+        # 查找用户信息
+        sql_check_user = text('select * from user where telephone = :telephone')
+        data = db.session.execute(sql_check_user, {'telephone': phone}).first()
+
         if not data:
+            return jsonify(status=1000, msg="用户不存在")
+
+        user = {'id': data[0], 'username': data[1], 'password': data[2], 'telephone': data[3]}
+
+        try:
+            # 验证旧密码
+            ph.verify(user['password'], old_pwd)
+        except VerifyMismatchError:
             return jsonify(status=1000, msg="原始密码错误")
-        else:
-            db.session.execute(text('update user set password="%s" where telephone="%s"' % (pwd, phone)))
+
+        # 加密新密码
+        hashed_new_pwd = ph.hash(new_pwd)
+
+        # 更新密码
+        try:
+            db.session.execute(text('update user set password = :password where telephone = :telephone'),
+                               {'password': hashed_new_pwd, 'telephone': phone})
             db.session.commit()
             return jsonify(status=200, msg="修改成功")
+        except Exception as e:
+            db.session.rollback()
+            return jsonify(status=500, msg=f"修改失败: {str(e)}")
 
 
 @app.route("/api/manager/shop", methods=["POST", "GET", "DELETE"])

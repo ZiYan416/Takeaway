@@ -87,51 +87,41 @@
                 </div>
             </div>
             <!-- 找回密码 -->
-            <div class="forget_box" v-show="target == 3">
-                <div class="head">
-                    <i class="icon iconfont icon-food"></i>外卖管理系统
-                </div>
+        <div class="forget_box" v-show="target == 3">
+            <div class="head">
+                <i class="icon iconfont icon-food"></i>外卖管理系统
+            </div>
+            <div>
+                <el-form class="reg_form" :model="findback_form" :rules="findback_rules" ref="findback_form">
+                    <!-- 手机号 -->
+                    <el-form-item prop="userortel">
+                        <el-input prefix-icon="iconfont icon-password" v-model="findback_form.userortel"
+                            spellcheck="false" placeholder="手机号码"></el-input>
+                    </el-form-item>
+                    <!-- 旧密码 -->
+                    <el-form-item prop="old_password">
+                        <el-input prefix-icon="iconfont icon-password" v-model="findback_form.old_password" show-password
+                            spellcheck="false" placeholder="旧密码"></el-input>
+                    </el-form-item>
+                    <!-- 新密码 -->
+                    <el-form-item prop="new_password">
+                        <el-input prefix-icon="iconfont icon-password" v-model="findback_form.new_password" show-password
+                            spellcheck="false" placeholder="新密码"></el-input>
+                    </el-form-item>
+                    <!-- 按钮 -->
+                    <el-form-item class="btns">
+                        <el-button type="primary" @click="findback()">确认修改</el-button>
+                    </el-form-item>
+
+                </el-form>
                 <div>
-                    <el-form class="reg_form" :model="findback_form" :rules="findback_rules" ref="findback_form">
-
-
-
-                        <el-form-item prop="telephone">
-                            <el-input prefix-icon="iconfont icon-password" v-model="reg_form.telephone"
-                                spellcheck="false" placeholder="手机号码"></el-input>
-                        </el-form-item>
-                        <!-- 密码 -->
-                        <el-form-item prop="password">
-                            <el-input prefix-icon="iconfont icon-password" v-model="reg_form.password" show-password
-                                spellcheck="false" placeholder="新密码"></el-input>
-                        </el-form-item>
-
-                        <!-- <el-form-item prop="vercode">
-                        <el-input v-model="reg_form.vercode" spellcheck="false" placeholder="验证码" style="width:230px">
-                        </el-input>
-                        <span style="width:120px;font-size: 16px;cursor: pointer;" @click="send_vercode_pre()"
-                            v-show="getcode_show">
-                            获取验证码
-                        </span>
-
-                        <span style="width:120px;font-size: 16px;cursor: pointer;" v-show="!getcode_show">
-                            {{ time_count }}s后重新获取
-                        </span>
-                    </el-form-item> -->
-                        <!-- 按钮 -->
-                        <el-form-item class="btns">
-                            <el-button type="primary" @click="findback()">确认修改</el-button>
-                        </el-form-item>
-
-                    </el-form>
                     <div>
-                        <div>
-                            <span @click="change(1)"
-                                style="margin-left:210px;color: #000;opacity: .5;font-weight: 400;font-size: 16px;cursor:pointer;">登录</span>
-                        </div>
+                        <span @click="change(1)"
+                            style="margin-left:210px;color: #000;opacity: .5;font-weight: 400;font-size: 16px;cursor:pointer;">登录</span>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 </template>
 
@@ -199,10 +189,35 @@ export default {
             this.$refs.findback_form.validate(valid => {
                 if (!valid)
                     return;
-                else if (this.findback_form.vercode == '')
-                    return;
                 else {
-                    console.log(111);
+                    this.$axios.request({
+                        method: 'POST',
+                        url: '/api/user/pwd_chg',
+                        data: {
+                            userortel: this.findback_form.userortel,
+                            old_pwd: this.findback_form.old_password,
+                            new_pwd: this.findback_form.new_password,
+                        }
+                    }).then((res) => {
+                        console.log(res.status);
+                        if (res.data.status == 200) {
+                            this.$message({
+                                message: '密码修改成功',
+                                type: 'success'
+                            })
+                            this.target = 1; // 修改成功后跳转到登录页面
+                        } else {
+                            this.$message({
+                                message: res.data.msg,
+                                type: 'error'
+                            })
+                        }
+                    }).catch(() => {
+                        this.$message({
+                            message: "网络故障",
+                            type: 'error'
+                        })
+                    })
                 }
             })
         },

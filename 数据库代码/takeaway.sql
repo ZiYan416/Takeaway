@@ -32,14 +32,6 @@ CREATE TABLE `dispatcher`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
--- Records of dispatcher
--- ----------------------------
-INSERT INTO `dispatcher` VALUES ('010100', '摇摆羊', '13365789765');
-INSERT INTO `dispatcher` VALUES ('010101', '小亮', '15878977898');
-INSERT INTO `dispatcher` VALUES ('1000011', '老八', '13526777887');
-INSERT INTO `dispatcher` VALUES ('10111', '赵三金', '15965578765');
-
--- ----------------------------
 -- Table structure for fastfood_shop
 -- ----------------------------
 DROP TABLE IF EXISTS `fastfood_shop`;
@@ -78,7 +70,6 @@ CREATE TABLE `oorder`  (
   `cons_addre` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `checked` int NULL DEFAULT 0,
   `create_time` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
-  `order_way` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`order_id`) USING BTREE,
   UNIQUE INDEX `order_id`(`order_id` ASC) USING BTREE,
   INDEX `shop_name`(`shop_name` ASC) USING BTREE,
@@ -190,34 +181,6 @@ CREATE TRIGGER `order_insert_sale` AFTER INSERT ON `oorder` FOR EACH ROW BEGIN
 UPDATE fastfood_shop
 SET fastfood_shop.m_sale_v=fastfood_shop.m_sale_v+1
 WHERE fastfood_shop.shop_name=new.shop_name;
-END
-;;
-delimiter ;
-
--- ----------------------------
--- Triggers structure for table oorder
--- ----------------------------
-DROP TRIGGER IF EXISTS `order_update`;
-delimiter ;;
-CREATE TRIGGER `order_update` AFTER UPDATE ON `oorder` FOR EACH ROW BEGIN
-if(new.order_way!=old.order_way)
-	then
-	UPDATE orderway SET orderway.count=orderway.count-1 WHERE orderway.orderway_name=old.order_way;
-	UPDATE orderway SET orderway.count=orderway.count+1 WHERE orderway.orderway_name=new.order_way;
-	END IF;
-	END
-;;
-delimiter ;
-
--- ----------------------------
--- Triggers structure for table oorder
--- ----------------------------
-DROP TRIGGER IF EXISTS `order_delete`;
-delimiter ;;
-CREATE TRIGGER `order_delete` AFTER DELETE ON `oorder` FOR EACH ROW BEGIN
-UPDATE orderway
-SET orderway.count=orderway.count-1
-WHERE orderway.orderway_name=old.order_way;
 END
 ;;
 delimiter ;

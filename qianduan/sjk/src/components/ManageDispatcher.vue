@@ -154,8 +154,8 @@ export default {
 
 .body {
 
-    width: 80%;
-    margin: auto;
+    width: 74%;
+    margin: 18%;
     margin-top: 30px;
 }
 </style>

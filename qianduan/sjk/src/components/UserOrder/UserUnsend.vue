@@ -5,21 +5,21 @@
         </div>
         <div class="body">
             <el-table :data="tabledata" style="width: 100%" class="table" border>
-                <el-table-column prop="shop_name" label="店铺" width="140" align="center">
+                <el-table-column prop="shop_name" label="店铺" min-width="20%" align="center">
                 </el-table-column>
-                <el-table-column prop="price" label="订单单价" width="100" align="center">
+                <el-table-column prop="price" label="订单单价" min-width="13%" align="center">
                 </el-table-column>
-                <el-table-column prop="quantity" label="订单数量" width="100" align="center">
+                <el-table-column prop="quantity" label="订单数量" min-width="13%" align="center">
                 </el-table-column>
-                <el-table-column prop="total_price" label="订单总价" width="100" align="center">
+                <el-table-column prop="total_price" label="订单总价" min-width="13%" align="center">
                 </el-table-column>
-                <el-table-column prop="create_time" label="下单时间" width="200" align="center">
+                <el-table-column prop="create_time" label="下单时间" min-width="25%" align="center">
                 </el-table-column>
-                <el-table-column prop="cons_name" label="订餐人姓名" width="140" align="center">
+                <el-table-column prop="cons_name" label="订餐人姓名" min-width="15%" align="center">
                 </el-table-column>
-                <el-table-column prop="cons_addre" label="取餐地址" width="190" align="center">
+                <el-table-column prop="cons_addre" label="取餐地址" min-width="40%" align="center">
                 </el-table-column>
-                <el-table-column prop="operate" label="操作" width="220" align="center">
+                <el-table-column prop="operate" label="操作" min-width="40%" align="center">
                     <template slot-scope="scope">
                         <el-button size="small" type="success" @click="showdia_ch(scope.row)">修改订单
                         </el-button>

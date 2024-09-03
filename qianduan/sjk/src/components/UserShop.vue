@@ -5,13 +5,13 @@
         </div>
         <div class="body">
             <el-table :data="tableData" style="width: 100%" class="table" border>
-                <el-table-column prop="shop_name" label="店铺名称" width="200" align="center">
+                <el-table-column prop="shop_name" label="店铺名称" min-width="40%" align="center">
                 </el-table-column>
-                <el-table-column prop="price" label="产品单价" width="200" align="center">
+                <el-table-column prop="price" label="产品单价" min-width="30%" align="center">
                 </el-table-column>
-                <el-table-column prop="sale" label="月销量" width="200" align="center">
+                <el-table-column prop="sale" label="月销量" min-width="30%" align="center">
                 </el-table-column>
-                <el-table-column prop="operate" label="操作" width="208" align="center">
+                <el-table-column prop="operate" label="操作" min-width="25%" align="center">
                     <template slot-scope="scope">
                         <el-button icon="el-icon-plus" size="small" type="success" @click="showdia(scope.row)">订餐
                         </el-button>
@@ -69,7 +69,6 @@
 
 <script>
 import { EventBus } from '@/eventBus'; // 引入事件总线
-
 export default {
     created() {
         this.getdata();
@@ -134,7 +133,7 @@ export default {
 }
 
 .body {
-    width: 62%;
+    width: 57%;
     margin: auto;
     margin-top: 30px;
 }
